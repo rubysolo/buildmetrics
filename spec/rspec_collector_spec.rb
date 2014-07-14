@@ -8,6 +8,12 @@ describe Buildmetrics::RSpecCollector do
     execution_result: double(started_at: Time.now)
   )}
 
+  let(:rspec2_group) { double( example: double(
+    full_description: 'assert the truth in RSpec2',
+    exception: nil,
+    execution_result: { started_at: Time.now }
+  )) }
+
   let(:collector) { described_class.new('build-123', 'user/repo', 'master', 'SHA') }
 
   it 'collects test run data' do
@@ -16,6 +22,15 @@ describe Buildmetrics::RSpecCollector do
 
     result = collector.tests.first
     expect(result.name).to eq 'assert the truth'
+    expect(result.passed).to be
+  end
+
+  it 'collects test run data from RSpec2 ExampleGroup' do
+    collector.collect(rspec2_group)
+    expect(collector.tests.length).to eq 1
+
+    result = collector.tests.first
+    expect(result.name).to eq 'assert the truth in RSpec2'
     expect(result.passed).to be
   end
 

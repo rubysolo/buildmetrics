@@ -17,7 +17,16 @@ module Buildmetrics
     Test = Struct.new(:name, :passed, :elapsed_time)
 
     def collect(group)
-      elapsed_time = Time.now.to_f - group.execution_result.started_at.to_f
+      if group.respond_to?(:example)
+        elapsed_time = Time.now.to_f - group.example.execution_result[:started_at].to_f
+        add_test(group.example, elapsed_time)
+      else
+        elapsed_time = Time.now.to_f - group.execution_result.started_at.to_f
+        add_test(group, elapsed_time)
+      end
+    end
+
+    def add_test(group, elapsed_time)
       @tests << Test.new(group.full_description, ! group.exception, elapsed_time)
     end
 
