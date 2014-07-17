@@ -12,7 +12,13 @@ module Buildmetrics
     def store(build)
       req = Net::HTTP::Post.new(@uri.path, headers)
       req.body = build.to_json
-      Net::HTTP.new(@uri.host, @uri.port).start { |http| http.request(req) }
+
+      http = Net::HTTP.new(@uri.host, @uri.port)
+      http.use_ssl = (@uri.scheme == "https")
+      # TODO : remove this
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+      http.start { |s| s.request(req) }
     end
 
     def headers
